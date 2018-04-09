@@ -1,5 +1,6 @@
 #include "ChakraCore.h"
 #include "fail_check.h"
+#include <string>
 
 JsRuntimeHandle* CreateRuntime(){
     static JsRuntimeHandle runtime;
@@ -18,53 +19,38 @@ JsContextRef* CreateContext(JsRuntimeHandle* runtime){
     return &context;
 }
 
+char* Eval_JS(JsContextRef* context, const char* script){
+    JsValueRef sourceUrl;
+    FAIL_CHECK(JsCreateString("kkk", strlen("kkk"), &sourceUrl));
 
-// int main()
-// {
-//     JsRuntimeHandle runtime;
-//     JsContextRef context;
-//     JsValueRef result;
-//     unsigned currentSourceContext = 0;
+    JsValueRef scriptSource;
+    FAIL_CHECK(JsCreateExternalArrayBuffer((void *)script, strlen(script), nullptr, nullptr, &scriptSource));
 
-//     // Your script; try replace hello-world with something else
-//     const char* script = "(()=>{return Date.now();})()";
+    JsValueRef result;
+    FAIL_CHECK(JsRun(scriptSource, 0, sourceUrl, JsParseScriptAttributeNone, &result));
 
-//     // Create a runtime.
-//     FAIL_CHECK(JsCreateRuntime(JsRuntimeAttributeNone, nullptr, &runtime));
+    JsValueRef resultJSString;
+    FAIL_CHECK(JsConvertValueToString(result, &resultJSString));
 
-//     // Create an execution context.
-//     FAIL_CHECK(JsCreateContext(runtime, &context));
+    char *resultSTR = nullptr;
+    size_t stringLength;
+    FAIL_CHECK(JsCopyString(resultJSString, nullptr, 0, &stringLength));
+    resultSTR = (char*) malloc(stringLength + 1);
+    FAIL_CHECK(JsCopyString(resultJSString, resultSTR, stringLength + 1, nullptr));
+    resultSTR[stringLength] = 0;
 
-//     // Now set the current execution context.
-//     FAIL_CHECK(JsSetCurrentContext(context));
+    return resultSTR;
+}
 
-//     JsValueRef fname;
-//     FAIL_CHECK(JsCreateString("sample", strlen("sample"), &fname));
+char* Eval_JS_File(JsContextRef* context, const char* path){
+    int c;
+    std::string str;
+    FILE* file = fopen(path, "r");
+    if (file) {
+        while ((c = getc(file)) != EOF)
+            str += (char)c;
+        fclose(file);
+    }
 
-//     JsValueRef scriptSource;
-//     FAIL_CHECK(JsCreateExternalArrayBuffer((void*)script, (unsigned int)strlen(script),
-//         nullptr, nullptr, &scriptSource));
-//     // Run the script.
-//     FAIL_CHECK(JsRun(scriptSource, currentSourceContext++, fname, JsParseScriptAttributeNone, &result));
-
-//     // Convert your script result to String in JavaScript; redundant if your script returns a String
-//     JsValueRef resultJSString;
-//     FAIL_CHECK(JsConvertValueToString(result, &resultJSString));
-
-//     // Project script result back to C++.
-//     char *resultSTR = nullptr;
-//     size_t stringLength;
-//     FAIL_CHECK(JsCopyString(resultJSString, nullptr, 0, &stringLength));
-//     resultSTR = (char*) malloc(stringLength + 1);
-//     FAIL_CHECK(JsCopyString(resultJSString, resultSTR, stringLength + 1, nullptr));
-//     resultSTR[stringLength] = 0;
-
-//     printf("Result -> %s \n", resultSTR);
-//     free(resultSTR);
-
-//     // Dispose runtime
-//     FAIL_CHECK(JsSetCurrentContext(JS_INVALID_REFERENCE));
-//     FAIL_CHECK(JsDisposeRuntime(runtime));
-
-//     return 0;
-// }
+    return Eval_JS(context, str.c_str());
+}
