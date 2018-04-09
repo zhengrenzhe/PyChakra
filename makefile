@@ -2,8 +2,8 @@
 # global config
 BASEDIR=./binaries/ChakraCore
 PLATFORM=darwin
-INPUT=./src/main.cxx
-OUTPUT=main
+INPUT=./test/PyChakra.test.cc
+OUTPUT=PyChakra.test
 
 IDIR=$(BASEDIR)/include
 CC=gcc
@@ -28,7 +28,9 @@ LIBS=-pthread -lm -ldl -licuuc -Wno-c++11-compat-deprecated-writable-strings \
 	-Wno-deprecated-declarations -Wno-unknown-warning-option -o $(OUTPUT)
 endif
 
-run:
+.PHONY: test
+
+test:
 	@ $(CC) $(INPUT) $(CFLAGS) $(FORCE_STARTS) $(LDIR) $(FORCE_ENDS) $(LIBS)
 	@ ./$(OUTPUT)
 	@ make clean
