@@ -1,0 +1,5 @@
+{
+    "C_Cpp.clang_format_path": "/usr/local/bin/clang-format",
+    "C_Cpp.clang_format_style": "WebKit",
+    "editor.formatOnSave": true
+}

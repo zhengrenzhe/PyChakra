@@ -1,3 +1,5 @@
+#pragma once
+
 #include "ChakraCore.h"
 #include "interfaces.cc"
 

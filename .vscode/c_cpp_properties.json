@@ -1,6 +1,7 @@
 {
     "configurations": [
         {
+            "name": "Mac",
             "includePath": [
                 "${workspaceRoot}/binaries/ChakraCore/include"
             ],
