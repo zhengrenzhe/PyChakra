@@ -1,70 +1,89 @@
+# -*- coding:utf-8 -*-
+
 import sys
-import os.path
-from ctypes import *
+from ctypes import CDLL, c_void_p, byref, create_string_buffer, c_size_t, \
+    c_char, addressof
 
 
-chakraCore = CDLL("../binaries/ChakraCore/lib/libChakraCore.dylib")
+class ChakraHandle():
 
-script = create_string_buffer("(()=>{return b;})()".encode('UTF-16'))
-fileName = "sample.js"
+    def __init__(self, lib_path):
+        chakraCore = CDLL(lib_path)
 
-runtime = c_void_p()
-# Create Javascript Runtime.
-chakraCore.JsCreateRuntime(0, 0, byref(runtime))
+        runtime = c_void_p()
+        chakraCore.JsCreateRuntime(0, 0, byref(runtime))
 
-context = c_void_p()
-# Create an execution context.
-chakraCore.JsCreateContext(runtime, byref(context))
+        context = c_void_p()
+        chakraCore.JsCreateContext(runtime, byref(context))
 
-# Now set the current execution context.
-chakraCore.JsSetCurrentContext(context)
+        chakraCore.JsSetCurrentContext(context)
 
-fname = c_void_p()
-# create JsValueRef from filename
-chakraCore.JsCreateString(fileName, len(fileName), byref(fname))
+        if sys.platform != 'win32':
+            chakraCore.DllMain(0, 1, 0)
+            chakraCore.DllMain(0, 2, 0)
 
-scriptSource = c_void_p()
-# Create ArrayBuffer from script source
-chakraCore.JsCreateExternalArrayBuffer(
-    script, len(script), 0, 0, byref(scriptSource))
+        self.runtime = runtime
+        self.context = context
+        self.chakraCore = chakraCore
 
-jsResult = c_void_p()
-# Run the script.
-pco = chakraCore.JsRun(scriptSource, 0, fname, 0x02, byref(jsResult))
+    def eval_js(self, script, source=""):
+        chakraCore = self.chakraCore
 
-if pco != 0:
+        js_source = c_void_p()
+        chakraCore.JsCreateString(source, len(source), byref(js_source))
+
+        js_script = c_void_p()
+        script = create_string_buffer(script.encode('UTF-16'))
+        chakraCore.JsCreateExternalArrayBuffer(
+            script, len(script), 0, 0, byref(js_script))
+
+        result = c_void_p()
+        err = chakraCore.JsRun(js_script, 0, js_source, 0x02, byref(result))
+
+        if err == 0:
+            return(True, js_value_to_str(chakraCore, result))
+
+        # js exception
+        elif err == 196609:
+            return(False, get_exception(chakraCore))
+
+        else:
+            return(False, err)
+
+    def eval_js_file(self, path):
+        with open(path, 'r') as file:
+            data = file.read()
+            return self.eval_js(data, path)
+
+
+def get_exception(chakraCore):
     exception = c_void_p()
     chakraCore.JsGetAndClearException(byref(exception))
+
     id = c_void_p()
-    # idname = c_void_p()
-    # create JsValueRef from filename
-    # chakraCore.JsCreateString("message", byref(idname))
     chakraCore.JsCreatePropertyId("message", len("message"), byref(id))
+
     value = c_void_p()
     chakraCore.JsGetProperty(exception, id, byref(value))
-    print("CAL")
 
-# Convert script result to String in JavaScript; redundant if script returns a String
-resultJSString = c_void_p()
-chakraCore.JsConvertValueToString(value, byref(resultJSString))
+    return js_value_to_str(chakraCore, value)
 
-stringLength = c_size_t()
-# Get buffer size needed for the result string
-chakraCore.JsCopyString(resultJSString, 0, 0, byref(stringLength))
 
-# buffer is big enough to store the result
-resultSTR = create_string_buffer(stringLength.value + 1)
+def js_value_to_str(chakraCore, js_value):
+    js_value_ref = c_void_p()
+    chakraCore.JsConvertValueToString(js_value, byref(js_value_ref))
 
-# Get String from JsValueRef
-chakraCore.JsCopyString(resultJSString, byref(
-    resultSTR), stringLength.value + 1, 0)
+    str_len = c_size_t()
+    chakraCore.JsCopyString(js_value_ref, 0, 0, byref(str_len))
 
-# Set `null-ending` to the end
-resultSTRLastByte = (
-    c_char * stringLength.value).from_address(addressof(resultSTR))
-resultSTRLastByte = '\0'
+    result = create_string_buffer(str_len.value + 1)
 
-print("Result from ChakraCore: ", resultSTR.value)
+    chakraCore.JsCopyString(js_value_ref, byref(
+        result), str_len.value + 1, 0)
 
-# Dispose runtime
-chakraCore.JsDisposeRuntime(runtime)
+    # pylint: disable=W0612
+    resultSTRLastByte = (
+        c_char * str_len.value).from_address(addressof(result))
+    resultSTRLastByte = '\0'  # noqa: F841
+
+    return result.value

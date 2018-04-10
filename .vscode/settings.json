@@ -1,5 +1,16 @@
 {
-    "C_Cpp.clang_format_path": "/usr/local/bin/clang-format",
-    "C_Cpp.clang_format_style": "WebKit",
-    "editor.formatOnSave": true
+    "python.pythonPath": "/usr/local/bin/python",
+    "python.linting.flake8Enabled": true,
+    "python.formatting.provider": "autopep8",
+    "editor.formatOnSave": true,
+    "editor.formatOnType": true,
+    "python.linting.enabled": true,
+    "files.exclude": {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/CVS": true,
+        "**/.DS_Store": true,
+        "**/.cache": true
+    }
 }
