@@ -40,6 +40,7 @@ class ChakraHandle():
         result = c_void_p()
         err = chakraCore.JsRun(js_script, 0, js_source, 0x02, byref(result))
 
+        # no error
         if err == 0:
             return(True, js_value_to_str(chakraCore, result))
 
@@ -47,6 +48,7 @@ class ChakraHandle():
         elif err == 196609:
             return(False, get_exception(chakraCore))
 
+        # other error
         else:
             return(False, err)
 
