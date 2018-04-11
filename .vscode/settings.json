@@ -11,6 +11,7 @@
         "**/.hg": true,
         "**/CVS": true,
         "**/.DS_Store": true,
-        "**/.cache": true
+        "**/.cache": true,
+        "**/*.pyc": true,
     }
 }
