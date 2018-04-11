@@ -20,7 +20,7 @@ es6 = os.path.join(ROOT, es6)
 
 class TestPyChakra(unittest.TestCase):
 
-    def test_react_and_es6(self):
+    def chakra(self):
         chakra = ChakraHandle()
 
         res1 = chakra.eval_js_file(react)
@@ -43,7 +43,7 @@ class TestPyChakra(unittest.TestCase):
 if __name__ == '__main__':
     suite = unittest.TestSuite()
 
-    tests = [TestPyChakra("test_react_and_es6")]
+    tests = [TestPyChakra("chakra")]
     suite.addTests(tests)
 
     runner = unittest.TextTestRunner(verbosity=2)

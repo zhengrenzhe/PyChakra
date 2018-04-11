@@ -11,7 +11,7 @@ PyChakra is a Python binding to Microsoft Chakra Javascript engine.
 """
 
 
-from sys import platform
+from sys import platform, version_info
 from os import path
 import ctypes as _ctypes
 
@@ -166,7 +166,10 @@ class ChakraHandle():
         last_byte = last_byte.from_address(_ctypes.addressof(result))
         last_byte = '\0'  # noqa: F841
 
-        return result.value
+        if version_info.major == 2:
+            return str(result.value)
+        else:
+            return str(result.value, encoding="utf-8")
 
 
 def point(any):
