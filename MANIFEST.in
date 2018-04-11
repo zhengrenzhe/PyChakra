@@ -1,1 +1,3 @@
 global-include *.dylib
+global-include *.so
+global-include *.dll
