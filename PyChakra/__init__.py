@@ -15,8 +15,6 @@ from sys import platform, version_info
 from os import path
 import ctypes as _ctypes
 
-from .__version__ import __version__  # noqa:F401
-
 
 class ChakraHandle():
 
