@@ -13,7 +13,7 @@ setup(
     name="PyChakra",
     packages=["PyChakra"],
     package_dir={"PyChakra": "PyChakra"},
-    version="0.0.2",
+    version="0.0.3",
     description="Python binding to Microsoft Chakra Javascript engine",
     long_description=open('README.md').read(),
     author="zhengrenzhe",
@@ -22,7 +22,7 @@ setup(
     url="https://github.com/zhengrenzhe/PyChakra",
     keywords=["Chakra", "JavaScript", "js engine", "binding"],
     license="MIT",
-    python_requires=">=2.6, >=3.3",
+    python_requires=">=2.6, !=3.0.*, !=3.1.*, !=3.2.*",
     classifiers=(
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python',

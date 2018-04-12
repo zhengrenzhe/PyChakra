@@ -47,4 +47,5 @@ if __name__ == '__main__':
     suite.addTests(tests)
 
     runner = unittest.TextTestRunner(verbosity=2)
-    runner.run(suite)
+    result = runner.run(suite)
+    sys.exit(not result)

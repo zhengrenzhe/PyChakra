@@ -168,7 +168,7 @@ class ChakraHandle():
         last_byte = last_byte.from_address(_ctypes.addressof(result))
         last_byte = '\0'  # noqa: F841
 
-        if version_info.major == 2:
+        if version_info[0] == 2:
             return str(result.value)
         else:
             return str(result.value, encoding="utf-8")
