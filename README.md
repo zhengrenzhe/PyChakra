@@ -64,3 +64,16 @@ Parameters:
  - script(path): javascript file absolute path
 
 Returns: same as eval_js
+
+
+
+## Supports
+
+- Python >=2.6
+- Python !=3.0.\*, !=3.1.\*, !=3.2.\*
+
+
+## Platform
+- macOS
+- Linux
+- Windows (tested on Windows 10 x64, Python 3.7)
