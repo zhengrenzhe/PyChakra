@@ -15,6 +15,8 @@ from sys import platform, version_info
 from os import path
 import ctypes as _ctypes
 
+from .__version__ import __version__  # noqa:F401
+
 
 class ChakraHandle():
 
@@ -66,7 +68,7 @@ class ChakraHandle():
 
             Examples:
                 .eval_js("(()=>2)()") // (True, '2')
-                .eval_js("(()=>2)()") // (False, "'a' is not defined")
+                .eval_js("(()=>a)()") // (False, "'a' is not defined")
 
             Parameters:
                 script(str): javascript code string
