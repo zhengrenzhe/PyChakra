@@ -1,13 +1,19 @@
 # -*- coding: utf-8 -*-
 
-from setuptools import setup
 from os import system
+from sys import platform
+from setuptools import setup
 from os.path import abspath, dirname
 
 ROOT = abspath(dirname(__file__))
 
 # download Chakra binaries
-system(ROOT + "/build.sh")
+if platform == "win32":
+    system("powershell.exe -executionpolicy unrestricted -command .\\build.ps1")  # noqa:E501
+elif platform == "darwin" or platform.startswith("linux"):
+    system(ROOT + "/build.sh")
+else:
+    raise RuntimeError("not support your platform: %s", platform)
 
 setup(
     name="PyChakra",
@@ -24,6 +30,9 @@ setup(
     license="MIT",
     python_requires=">=2.6, !=3.0.*, !=3.1.*, !=3.2.*",
     classifiers=(
+        'Development Status :: 5 - Production/Stable',
+        'Intended Audience :: Developers',
+        'Natural Language :: English',
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python',
         'Programming Language :: Python :: 2',

@@ -1,3 +1,5 @@
+#!/bin/bash
+
 PLATFORM=`uname`
 
 if [ $PLATFORM = "Darwin" ]; then
@@ -6,6 +8,8 @@ elif [ $PLATFORM = "Linux" ]; then
     FiLENAME="cc_linux_x64_1_8_2"
 fi
 
-wget `expr https://aka.ms/chakracore/"$FiLENAME"`
+if [ ! -f $FiLENAME ]; then
+    wget `expr https://aka.ms/chakracore/"$FiLENAME"`
+fi
 tar -zxvf $FiLENAME
 cp ChakraCoreFiles/lib/* PyChakra
