@@ -19,7 +19,7 @@ setup(
     name="PyChakra",
     packages=["PyChakra"],
     package_dir={"PyChakra": "PyChakra"},
-    version="1.0.1",
+    version="1.0.2",
     description="Python binding to Microsoft Chakra Javascript engine",
     long_description=open('README.md').read(),
     author="zhengrenzhe",
