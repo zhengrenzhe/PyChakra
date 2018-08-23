@@ -1,5 +1,5 @@
-$url = "https://aka.ms/chakracore/cc_windows_all_1_8_3"
-$output = "$PSScriptRoot\cc_windows_all_1_8_3.zip"
+$url = "https://aka.ms/chakracore/cc_windows_all_1_10_2"
+$output = "$PSScriptRoot\cc_windows_all_1_10_2.zip"
 
 # download
 if(![System.IO.File]::Exists($output)){
