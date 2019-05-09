@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/zhengrenzhe/PyChakra.svg?branch=master)](https://travis-ci.org/zhengrenzhe/PyChakra)
 
-PyChakra is a Python binding to [Microsoft Chakra](https://github.com/Microsoft/ChakraCore)(v1.10.2) Javascript engine.
+PyChakra is a Python binding to [Microsoft Chakra](https://github.com/Microsoft/ChakraCore)(v1.11.8) Javascript engine.
 PyChakra will be downloading pre-compiled Chakra binaries when install, so the process is fast and easy.
 
 Chakra is a modern JavaScript engine for Microsoft Edge, it support 96% ES6 feature, Complete info see [https://kangax.github.io/compat-table/es6/](https://kangax.github.io/compat-table/es6/)
@@ -30,7 +30,7 @@ runtime = ChakraHandle()
 
 runtime.eval_js("(()=>2)()") # (True, '2')
 runtime.eval_js("(()=>a)()") # (False, "'a' is not defined")
-runtime.eval_js("/Users/test/test.js") # (bool, result)
+runtime.eval_js_file("/Users/test/test.js") # (bool, result)
 ```
 
 ## API

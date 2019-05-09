@@ -1,23 +1,19 @@
 # -*- coding: utf-8 -*-
-
+#
 #  ___         ___  _           _
 # | _ \ _  _  / __|| |_   __ _ | |__ _ _  __ _
 # |  _/| || || (__ | ' \ / _` || / /| '_|/ _` |
 # |_|   \_, | \___||_||_|\__,_||_\_\|_|  \__,_|
 #       |__/
-
-"""
-PyChakra is a Python binding to Microsoft Chakra Javascript engine.
-"""
-
+#
+# PyChakra is a Python binding to Microsoft Chakra JavaScript engine.
 
 from sys import platform, version_info
 from os import path
 import ctypes as _ctypes
 
 
-class ChakraHandle():
-
+class ChakraHandle:
     def __init__(self):
 
         # load chakra binary

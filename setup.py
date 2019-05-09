@@ -19,8 +19,8 @@ setup(
     name="PyChakra",
     packages=["PyChakra"],
     package_dir={"PyChakra": "PyChakra"},
-    version="1.0.3",
-    description="Python binding to Microsoft Chakra Javascript engine",
+    version="1.0.4",
+    description="Python binding to Microsoft Chakra JavaScript engine",
     long_description=open('README.md').read(),
     author="zhengrenzhe",
     author_email="zhengrenzhe.niujie@gmail.com",
@@ -43,5 +43,6 @@ setup(
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
     )
 )
