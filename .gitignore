@@ -104,3 +104,4 @@ ChakraCoreFiles/
 cc_osx*
 
 .idea
+.DS_Store

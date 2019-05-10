@@ -29,7 +29,7 @@ setup(
     keywords=["Chakra", "JavaScript", "js engine", "binding"],
     license="MIT",
     python_requires=">=2.6, !=3.0.*, !=3.1.*, !=3.2.*",
-    classifiers=(
+    classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
         'Natural Language :: English',
@@ -44,5 +44,5 @@ setup(
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
-    )
+    ]
 )
