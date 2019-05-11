@@ -17,7 +17,7 @@ setup(
     keywords="Chakra ChakraCore V8 JavaScript js-engine binding",
     license="MIT",
     python_requires=">2.6, !=3.0.*, !=3.1.*, !=3.2.*",
-    data_files=[("libs", glob("libs/**/*.*", recursive=True))],
+    data_files=[("libs", glob("libs/**/*.*"))],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
