@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 
-from setuptools import setup, find_packages
+from glob import glob
+
+from setuptools import setup
 
 setup(
     name="PyChakra",
     version="2.0.0",
-    packages=find_packages("PyChakra"),
+    packages=["PyChakra"],
     package_dir={"PyChakra": "PyChakra"},
     description="Python binding to Microsoft Chakra JavaScript engine",
     long_description=open('README.md').read(),
@@ -15,7 +17,7 @@ setup(
     keywords="Chakra ChakraCore V8 JavaScript js-engine binding",
     license="MIT",
     python_requires=">2.6, !=3.0.*, !=3.1.*, !=3.2.*",
-    include_package_data=True,
+    data_files=[("libs", glob("libs/**/*.*", recursive=True))],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
