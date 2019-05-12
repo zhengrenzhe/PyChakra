@@ -1,6 +1,10 @@
 # PyChakra
 
 [![Build Status](https://travis-ci.org/zhengrenzhe/PyChakra.svg?branch=master)](https://travis-ci.org/zhengrenzhe/PyChakra)
+[![LICENSE](https://img.shields.io/github/license/zhengrenzhe/PyChakra.svg)](https://github.com/zhengrenzhe/PyChakra)
+[![VERSION](https://img.shields.io/pypi/v/PyChakra.svg)](https://pypi.org/project/PyChakra/)
+[![DL](https://img.shields.io/pypi/dm/PyChakra.svg)](https://pypi.org/project/PyChakra/)
+
 
 PyChakra is a Python binding to [Microsoft Chakra](https://github.com/Microsoft/ChakraCore)(v1.11.8) Javascript engine.
 PyChakra will be downloading pre-compiled Chakra binaries when install, so the process is fast and easy.

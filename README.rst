@@ -1,7 +1,7 @@
 PyChakra
 ========
 
-|Build Status|
+|Build Status| |LICENSE| |VERSION| |DL|
 
 PyChakra is a Python binding to `Microsoft Chakra`_\ (v1.11.8)
 Javascript engine. PyChakra will be downloading pre-compiled Chakra
@@ -102,3 +102,9 @@ Platform
 
 .. |Build Status| image:: https://travis-ci.org/zhengrenzhe/PyChakra.svg?branch=master
    :target: https://travis-ci.org/zhengrenzhe/PyChakra
+.. |LICENSE| image:: https://img.shields.io/github/license/zhengrenzhe/PyChakra.svg
+   :target: https://github.com/zhengrenzhe/PyChakra
+.. |VERSION| image:: https://img.shields.io/pypi/v/PyChakra.svg
+   :target: https://pypi.org/project/PyChakra/
+.. |DL| image:: https://img.shields.io/pypi/dm/PyChakra.svg
+   :target: https://pypi.org/project/PyChakra/
