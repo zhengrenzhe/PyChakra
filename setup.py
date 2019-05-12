@@ -1,23 +1,29 @@
 # -*- coding: utf-8 -*-
 
-from glob import glob
-
 from setuptools import setup
 
 setup(
     name="PyChakra",
-    version="2.0.1",
+    version="2.1.3",
     packages=["PyChakra"],
     package_dir={"PyChakra": "PyChakra"},
     description="Python binding to Microsoft Chakra JavaScript engine",
-    long_description=open('README.md').read(),
+    long_description=open("README.rst").read(),
     author="zhengrenzhe",
     author_email="zhengrenzhe.niujie@gmail.com",
     url="https://github.com/zhengrenzhe/PyChakra",
     keywords="Chakra ChakraCore V8 JavaScript js-engine binding",
     license="MIT",
     python_requires=">2.6, !=3.0.*, !=3.1.*, !=3.2.*",
-    data_files=[("libs", glob("PyChakra/libs/**/**/*.*"))],
+    include_package_data=True,
+    package_data={
+        "libs": [
+            "PyChakra/libs/linux/libChakraCore.so",
+            "PyChakra/libs/osx/libChakraCore.dylib",
+            "PyChakra/libs/windows/x64/ChakraCore.dll",
+            "PyChakra/libs/windows/x86/ChakraCore.dll",
+        ]
+    },
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',

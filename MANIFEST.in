@@ -1,0 +1,4 @@
+include PyChakra/libs/linux/libChakraCore.so
+include PyChakra/libs/osx/libChakraCore.dylib
+include PyChakra/libs/windows/x64/ChakraCore.dll
+include PyChakra/libs/windows/x86/ChakraCore.dll
