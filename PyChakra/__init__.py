@@ -16,7 +16,7 @@ from os import path
 
 
 def get_lib_path():
-    root = path.dirname(path.abspath(path.dirname(__file__)))
+    root = path.dirname(__file__)
 
     if sys.platform == "darwin":
         return path.join(root, "libs/osx/libChakraCore.dylib")

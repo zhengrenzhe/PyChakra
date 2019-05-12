@@ -6,7 +6,7 @@ from setuptools import setup
 
 setup(
     name="PyChakra",
-    version="2.0.0",
+    version="2.0.1",
     packages=["PyChakra"],
     package_dir={"PyChakra": "PyChakra"},
     description="Python binding to Microsoft Chakra JavaScript engine",
@@ -17,7 +17,7 @@ setup(
     keywords="Chakra ChakraCore V8 JavaScript js-engine binding",
     license="MIT",
     python_requires=">2.6, !=3.0.*, !=3.1.*, !=3.2.*",
-    data_files=[("libs", glob("libs/**/*.*"))],
+    data_files=[("libs", glob("PyChakra/libs/**/**/*.*"))],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
