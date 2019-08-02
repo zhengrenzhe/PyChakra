@@ -63,7 +63,7 @@ class Runtime:
         # get JSON.stringify reference, and create its called arguments array
         self.__jsonStringify = self.eval_js("JSON.stringify", raw=True)[1]
 
-        undefined = _ctypes.c_void_p()
+        undefined = ctypes.c_void_p()
         chakraCore.JsGetUndefinedValue(point(undefined))
 
         self.__jsonStringifyArgs = (ctypes.c_void_p * 2)()
@@ -74,10 +74,10 @@ class Runtime:
 
     if sys.platform == "win32":
         def eval(self, js_string, raw=False):
-            js_source = _ctypes.c_wchar_p("")
-            js_script = _ctypes.c_wchar_p(js_string)
+            js_source = ctypes.c_wchar_p("")
+            js_script = ctypes.c_wchar_p(js_string)
 
-            result = _ctypes.c_void_p()
+            result = ctypes.c_void_p()
             err = chakraCore.JsRunScript(js_script, 0, js_source, point(result))
 
             # eval success
@@ -114,7 +114,7 @@ class Runtime:
         self.__jsonStringifyArgs[1] = js_value
 
         # value => json
-        result = _ctypes.c_void_p()
+        result = ctypes.c_void_p()
         err = self.chakraCore.JsCallFunction(self.__jsonStringify, point(self.__jsonStringifyArgs), 2, point(result))
 
         if err == 0:
@@ -152,11 +152,11 @@ class Runtime:
 
     if sys.platform == "win32":
         def __js_value_to_str(self, js_value):
-            js_value_ref = _ctypes.c_void_p()
+            js_value_ref = ctypes.c_void_p()
             self.chakraCore.JsConvertValueToString(js_value, point(js_value_ref))
 
-            result = _ctypes.c_wchar_p()
-            result_len = _ctypes.c_size_t()
+            result = ctypes.c_wchar_p()
+            result_len = ctypes.c_size_t()
             self.chakraCore.JsStringToPointer(js_value_ref, point(result), point(result_len))
 
             return result.value
