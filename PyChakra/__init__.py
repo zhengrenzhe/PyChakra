@@ -60,31 +60,73 @@ class Runtime:
             # Attach main thread
             self.chakraCore.DllMain(0, 2, 0)
 
+        # get JSON.stringify reference, and create its called arguments array
+        self.__jsonStringify = self.eval_js("JSON.stringify", raw=True)[1]
+
+        undefined = _ctypes.c_void_p()
+        chakraCore.JsGetUndefinedValue(point(undefined))
+
+        self.__jsonStringifyArgs = (ctypes.c_void_p * 2)()
+        self.__jsonStringifyArgs[0] = undefined
+
     def __del__(self):
         self.chakraCore.JsDisposeRuntime(self.runtime)
 
-    def eval(self, js_string):
-        js_source = ctypes.c_void_p()
-        self.chakraCore.JsCreateString("", len(""), point(js_source))
+    if sys.platform == "win32":
+        def eval(self, js_string, raw=False):
+            js_source = _ctypes.c_wchar_p("")
+            js_script = _ctypes.c_wchar_p(js_string)
 
-        js_script = ctypes.c_void_p()
-        js_string = ctypes.create_string_buffer(js_string.encode('UTF-16'))
-        self.chakraCore.JsCreateExternalArrayBuffer(js_string, len(js_string), 0, 0, point(js_script))
+            result = _ctypes.c_void_p()
+            err = chakraCore.JsRunScript(js_script, 0, js_source, point(result))
 
-        result = ctypes.c_void_p()
-        err = self.chakraCore.JsRun(js_script, 0, js_source, 0x02, point(result))
+            # eval success
+            if err == 0:
+                if raw:
+                    return True, result
+                else:
+                    return self.__js_value_to_py_value(result)
 
-        # eval success
+            return self.__get_error(err)
+
+    else:
+        def eval(self, js_string, raw=False):
+            js_source = ctypes.c_void_p()
+            self.chakraCore.JsCreateString("", len(""), point(js_source))
+
+            js_script = ctypes.c_void_p()
+            js_string = ctypes.create_string_buffer(js_string.encode('UTF-16'))
+            self.chakraCore.JsCreateExternalArrayBuffer(js_string, len(js_string), 0, 0, point(js_script))
+
+            result = ctypes.c_void_p()
+            err = self.chakraCore.JsRun(js_script, 0, js_source, 0x02, point(result))
+
+            # eval success
+            if err == 0:
+                if raw:
+                    return True, result
+                else:
+                    return self.__js_value_to_py_value(result)
+
+            return self.__get_error(err)
+
+    def __js_value_to_py_value(self, js_value):
+        self.__jsonStringifyArgs[1] = js_value
+
+        # value => json
+        result = _ctypes.c_void_p()
+        err = self.chakraCore.JsCallFunction(self.__jsonStringify, point(self.__jsonStringifyArgs), 2, point(result))
+
         if err == 0:
-            return True, self.__js_value_to_str(result)
+            result = self.__js_value_to_str(result)
+            if result == "undefined":
+                result = None
+            else:
+                # json => value
+                result = json.loads(result)
+            return True, result
 
-        # js exception
-        elif err == 196609:
-            return False, self.__get_exception()
-
-        # other error
-        else:
-            return False, result
+        return self.__get_error(err)
 
     def get_variable(self, name):
         result = self.eval("(() => %s)()" % name)
@@ -95,36 +137,48 @@ class Runtime:
     def set_variable(self, name, value):
         return self.eval("var %s = %s" % (name, value))
 
+    def __get_error(self, err):
+        # js exception or other error
+        if err == 196609:
+            err = self.__get_exception()
+
+        return False, err
+
     def __get_exception(self):
         exception = ctypes.c_void_p()
         self.chakraCore.JsGetAndClearException(point(exception))
 
-        exception_id = ctypes.c_void_p()
-        id_str = b"message"
-        self.chakraCore.JsCreatePropertyId(id_str, len(id_str), point(exception_id))
+        return self.__js_value_to_str(exception)
 
-        value = ctypes.c_void_p()
-        self.chakraCore.JsGetProperty(exception, exception_id, point(value))
+    if sys.platform == "win32":
+        def __js_value_to_str(self, js_value):
+            js_value_ref = _ctypes.c_void_p()
+            self.chakraCore.JsConvertValueToString(js_value, point(js_value_ref))
 
-        return self.__js_value_to_str(value)
+            result = _ctypes.c_wchar_p()
+            result_len = _ctypes.c_size_t()
+            self.chakraCore.JsStringToPointer(js_value_ref, point(result), point(result_len))
 
-    def __js_value_to_str(self, js_value):
-        js_value_ref = ctypes.c_void_p()
-        self.chakraCore.JsConvertValueToString(js_value, point(js_value_ref))
+            return result.value
 
-        str_len = ctypes.c_size_t()
-        self.chakraCore.JsCopyString(js_value_ref, 0, 0, point(str_len))
+    else:
+        def __js_value_to_str(self, js_value):
+            js_value_ref = ctypes.c_void_p()
+            self.chakraCore.JsConvertValueToString(js_value, point(js_value_ref))
 
-        result = ctypes.create_string_buffer(str_len.value + 1)
+            str_len = ctypes.c_size_t()
+            self.chakraCore.JsCopyString(js_value_ref, 0, 0, point(str_len))
 
-        self.chakraCore.JsCopyString(js_value_ref, point(result), str_len.value + 1, 0)
+            result = ctypes.create_string_buffer(str_len.value + 1)
 
-        # set last byte as '\0'
-        _ = (ctypes.c_char * str_len.value).from_address(ctypes.addressof(result))
-        _ = '\0'
+            self.chakraCore.JsCopyString(js_value_ref, point(result), str_len.value + 1, 0)
 
-        # python 2.X
-        if sys.version_info.major == 2:
-            return str(result.value)
-        else:
-            return str(result.value, encoding="utf-8")
+            # set last byte as '\0'
+            _ = (ctypes.c_char * str_len.value).from_address(ctypes.addressof(result))
+            _ = '\0'
+
+            # python 2.X
+            if sys.version_info.major == 2:
+                return str(result.value)
+            else:
+                return str(result.value, encoding="utf-8")
