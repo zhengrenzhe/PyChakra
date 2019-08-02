@@ -64,7 +64,7 @@ class Runtime:
         self.__jsonStringify = self.eval("JSON.stringify", raw=True)[1]
 
         undefined = ctypes.c_void_p()
-        chakraCore.JsGetUndefinedValue(point(undefined))
+        self.chakraCore.JsGetUndefinedValue(point(undefined))
 
         self.__jsonStringifyArgs = (ctypes.c_void_p * 2)()
         self.__jsonStringifyArgs[0] = undefined
