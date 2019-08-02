@@ -61,7 +61,7 @@ class Runtime:
             self.chakraCore.DllMain(0, 2, 0)
 
         # get JSON.stringify reference, and create its called arguments array
-        self.__jsonStringify = self.eval_js("JSON.stringify", raw=True)[1]
+        self.__jsonStringify = self.eval("JSON.stringify", raw=True)[1]
 
         undefined = ctypes.c_void_p()
         chakraCore.JsGetUndefinedValue(point(undefined))
