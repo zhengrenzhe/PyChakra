@@ -4,8 +4,7 @@ PyChakra
 |Build Status| |LICENSE| |VERSION| |DL|
 
 PyChakra is a Python binding to `Microsoft Chakra`_\ (v1.11.8)
-Javascript engine. PyChakra will be downloading pre-compiled Chakra
-binaries when install, so the process is fast and easy.
+Javascript engine.
 
 Chakra is a modern JavaScript engine for Microsoft Edge, it support 96%
 ES6 feature, Complete info see
@@ -29,12 +28,12 @@ Usage
    runtime = Runtime()
 
    # eval JavaScript code
-   runtime.eval("(() => 2)();") # (True, '2')
-   runtime.eval("(() => a)();") # (False, "'a' is not defined")
+   runtime.eval("(() => 2)();") # (True, 2)
+   runtime.eval("(() => a)();") # (False, "ReferenceError: 'a' is not defined")
 
    # set or get variable
    runtime.set_variable("foo", "'bar'") # True
-   runtime.get_variable("foo") # bar
+   runtime.get_variable("foo") # 'bar'
 
 API
 ---
@@ -48,7 +47,7 @@ Parameters:
 
 -  ``js_string: str``: JavaScript code string
 
-Returns: ``(is_successful: bool, result: string|number)``
+Returns: ``(is_successful: bool, result: any)``
 
 -  ``is_successfully``: indicates whether JavaScript is running
    successfully.
@@ -100,8 +99,8 @@ Platform
 .. _Microsoft Chakra: https://github.com/Microsoft/ChakraCore
 .. _github: https://github.com/Microsoft/ChakraCore/wiki/JsErrorCode
 
-.. |Build Status| image:: https://travis-ci.org/zhengrenzhe/PyChakra.svg?branch=master
-   :target: https://travis-ci.org/zhengrenzhe/PyChakra
+.. |Build Status| image:: https://dev.azure.com/zhengrenzhe/All%20Code%20Tests/_apis/build/status/PyChakra?branchName=master
+   :target: https://dev.azure.com/zhengrenzhe/All%20Code%20Tests/_build/latest?definitionId=2&branchName=master
 .. |LICENSE| image:: https://img.shields.io/github/license/zhengrenzhe/PyChakra.svg
    :target: https://github.com/zhengrenzhe/PyChakra
 .. |VERSION| image:: https://img.shields.io/pypi/v/PyChakra.svg
