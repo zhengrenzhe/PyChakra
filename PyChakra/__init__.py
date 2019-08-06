@@ -12,6 +12,7 @@
 import ctypes
 import platform
 import sys
+import json
 from os import path
 
 
@@ -60,31 +61,63 @@ class Runtime:
             # Attach main thread
             self.chakraCore.DllMain(0, 2, 0)
 
+        # get JSON.stringify reference, and create its called arguments array
+        self.__jsonStringify = self.eval("JSON.stringify", raw=True)[1]
+
+        undefined = ctypes.c_void_p()
+        self.chakraCore.JsGetUndefinedValue(point(undefined))
+
+        self.__jsonStringifyArgs = (ctypes.c_void_p * 2)()
+        self.__jsonStringifyArgs[0] = undefined
+
     def __del__(self):
         self.chakraCore.JsDisposeRuntime(self.runtime)
 
-    def eval(self, js_string):
-        js_source = ctypes.c_void_p()
-        self.chakraCore.JsCreateString("", len(""), point(js_source))
+    def eval(self, js_string, raw=False):
+        if sys.platform == "win32":
+            js_source = ctypes.c_wchar_p("")
+            js_script = ctypes.c_wchar_p(js_string)
 
-        js_script = ctypes.c_void_p()
-        js_string = ctypes.create_string_buffer(js_string.encode('UTF-16'))
-        self.chakraCore.JsCreateExternalArrayBuffer(js_string, len(js_string), 0, 0, point(js_script))
+            result = ctypes.c_void_p()
+            err = self.chakraCore.JsRunScript(js_script, 0, js_source, point(result))
 
-        result = ctypes.c_void_p()
-        err = self.chakraCore.JsRun(js_script, 0, js_source, 0x02, point(result))
+        else:
+            js_source = ctypes.c_void_p()
+            self.chakraCore.JsCreateString("", 0, point(js_source))
+
+            js_script = ctypes.c_void_p()
+            js_string = ctypes.create_string_buffer(js_string.encode("UTF-16"))
+            self.chakraCore.JsCreateExternalArrayBuffer(js_string, len(js_string), 0, 0, point(js_script))
+
+            result = ctypes.c_void_p()
+            err = self.chakraCore.JsRun(js_script, 0, js_source, 0x02, point(result))
 
         # eval success
         if err == 0:
-            return True, self.__js_value_to_str(result)
+            if raw:
+                return True, result
+            else:
+                return self.__js_value_to_py_value(result)
 
-        # js exception
-        elif err == 196609:
-            return False, self.__get_exception()
+        return self.__get_error(err)
 
-        # other error
-        else:
-            return False, result
+    def __js_value_to_py_value(self, js_value):
+        self.__jsonStringifyArgs[1] = js_value
+
+        # value => json
+        result = ctypes.c_void_p()
+        err = self.chakraCore.JsCallFunction(self.__jsonStringify, point(self.__jsonStringifyArgs), 2, point(result))
+
+        if err == 0:
+            result = self.__js_value_to_str(result)
+            if result == "undefined":
+                result = None
+            else:
+                # json => value
+                result = json.loads(result)
+            return True, result
+
+        return self.__get_error(err)
 
     def get_variable(self, name):
         result = self.eval("(() => %s)()" % name)
@@ -95,36 +128,35 @@ class Runtime:
     def set_variable(self, name, value):
         return self.eval("var %s = %s" % (name, value))
 
+    def __get_error(self, err):
+        # js exception or other error
+        if err == 196609:
+            err = self.__get_exception()
+
+        return False, err
+
     def __get_exception(self):
         exception = ctypes.c_void_p()
         self.chakraCore.JsGetAndClearException(point(exception))
 
-        exception_id = ctypes.c_void_p()
-        id_str = b"message"
-        self.chakraCore.JsCreatePropertyId(id_str, len(id_str), point(exception_id))
-
-        value = ctypes.c_void_p()
-        self.chakraCore.JsGetProperty(exception, exception_id, point(value))
-
-        return self.__js_value_to_str(value)
+        return self.__js_value_to_str(exception)
 
     def __js_value_to_str(self, js_value):
         js_value_ref = ctypes.c_void_p()
         self.chakraCore.JsConvertValueToString(js_value, point(js_value_ref))
 
-        str_len = ctypes.c_size_t()
-        self.chakraCore.JsCopyString(js_value_ref, 0, 0, point(str_len))
+        if sys.platform == "win32":
+            result = ctypes.c_wchar_p()
+            result_len = ctypes.c_size_t()
+            self.chakraCore.JsStringToPointer(js_value_ref, point(result), point(result_len))
 
-        result = ctypes.create_string_buffer(str_len.value + 1)
+            return result.value
 
-        self.chakraCore.JsCopyString(js_value_ref, point(result), str_len.value + 1, 0)
-
-        # set last byte as '\0'
-        _ = (ctypes.c_char * str_len.value).from_address(ctypes.addressof(result))
-        _ = '\0'
-
-        # python 2.X
-        if sys.version_info.major == 2:
-            return str(result.value)
         else:
-            return str(result.value, encoding="utf-8")
+            str_len = ctypes.c_size_t()
+            self.chakraCore.JsCopyString(js_value_ref, 0, 0, point(str_len))
+
+            result = ctypes.create_string_buffer(str_len.value)
+            self.chakraCore.JsCopyString(js_value_ref, point(result), str_len.value, 0)
+
+            return result.value.decode("UTF-8")
