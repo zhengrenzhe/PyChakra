@@ -25,15 +25,17 @@ class TestPyChakra(unittest.TestCase):
 
         res1 = chakra.eval(open(react).read())
         self.assertEqual(True, res1[0])
-        self.assertEqual("undefined", res1[1])
+        self.assertEqual(None, res1[1])
 
         res2 = chakra.eval(open(react_domserver).read())
         self.assertEqual(True, res2[0])
-        self.assertEqual("undefined", res2[1])
+        self.assertEqual(None, res2[1])
 
         res3 = chakra.eval(open(es6).read())
         self.assertEqual(True, res3[0])
-        self.assertEqual("[object Object]", res3[1])
+        self.assertEqual(
+            {u'__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED': {u'ReactCurrentOwner': {u'current': None}},
+             u'version': u'16.3.1', u'Children': {}}, res3[1])
 
         res4 = chakra.eval("typeof ReactDOMServer.renderToStaticMarkup")
         self.assertEqual(True, res4[0])
@@ -47,11 +49,11 @@ class TestPyChakra(unittest.TestCase):
 
         res7 = chakra.eval("(() => 2)();")
         self.assertEqual(True, res7[0])
-        self.assertEqual("2", res7[1])
+        self.assertEqual(2, res7[1])
 
         res8 = chakra.eval("(() => a)()")
         self.assertEqual(False, res8[0])
-        self.assertEqual("'a' is not defined", res8[1])
+        self.assertEqual("ReferenceError: 'a' is not defined", res8[1])
 
 
 if __name__ == '__main__':
@@ -62,4 +64,4 @@ if __name__ == '__main__':
 
     runner = unittest.TextTestRunner(verbosity=2)
     result = runner.run(suite)
-    sys.exit(not result)
+    sys.exit(len(result.failures))
