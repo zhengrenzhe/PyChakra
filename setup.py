@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name="PyChakra",
-    version="2.1.3",
+    version="2.2.0",
     packages=["PyChakra"],
     package_dir={"PyChakra": "PyChakra"},
     description="Python binding to Microsoft Chakra JavaScript engine",
