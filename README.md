@@ -1,6 +1,7 @@
 # PyChakra
 
-[![Build Status](https://dev.azure.com/zhengrenzhe/All%20Code%20Tests/_apis/build/status/PyChakra?branchName=master)](https://dev.azure.com/zhengrenzhe/All%20Code%20Tests/_build/latest?definitionId=2&branchName=master)
+[![Azure Build Status](https://dev.azure.com/zhengrenzhe/All%20Code%20Tests/_apis/build/status/PyChakra?branchName=master)](https://dev.azure.com/zhengrenzhe/All%20Code%20Tests/_build/latest?definitionId=2&branchName=master)
+[![Github Build Status](https://github.com/zhengrenzhe/PyChakra/workflows/Test/badge.svg)](https://github.com/zhengrenzhe/PyChakra/actions)
 [![LICENSE](https://img.shields.io/github/license/zhengrenzhe/PyChakra.svg)](https://github.com/zhengrenzhe/PyChakra)
 [![VERSION](https://img.shields.io/pypi/v/PyChakra.svg)](https://pypi.org/project/PyChakra/)
 [![DL](https://img.shields.io/pypi/dm/PyChakra.svg)](https://pypi.org/project/PyChakra/)

@@ -1,7 +1,7 @@
 PyChakra
 ========
 
-|Build Status| |LICENSE| |VERSION| |DL|
+|Azure Build Status| |LICENSE| |VERSION| |DL|
 
 PyChakra is a Python binding to `Microsoft Chakra`_\ (v1.11.11)
 Javascript engine.
@@ -99,8 +99,10 @@ Platform
 .. _Microsoft Chakra: https://github.com/Microsoft/ChakraCore
 .. _github: https://github.com/Microsoft/ChakraCore/wiki/JsErrorCode
 
-.. |Build Status| image:: https://dev.azure.com/zhengrenzhe/All%20Code%20Tests/_apis/build/status/PyChakra?branchName=master
+.. |Azure Build Status| image:: https://dev.azure.com/zhengrenzhe/All%20Code%20Tests/_apis/build/status/PyChakra?branchName=master
    :target: https://dev.azure.com/zhengrenzhe/All%20Code%20Tests/_build/latest?definitionId=2&branchName=master
+.. |Github Build Status| image:: https://github.com/zhengrenzhe/PyChakra/workflows/Test/badge.svg
+   :target: https://github.com/zhengrenzhe/PyChakra/actions
 .. |LICENSE| image:: https://img.shields.io/github/license/zhengrenzhe/PyChakra.svg
    :target: https://github.com/zhengrenzhe/PyChakra
 .. |VERSION| image:: https://img.shields.io/pypi/v/PyChakra.svg
