@@ -312,12 +312,11 @@ class Runtime:
                 return self.__get_error(err)
 
         else:
-            if isinstance(value, unicode):
-                pass
-            elif isinstance(value, (str, bytes)):
-                value = self.__check_js_string(value)
-            else:
+            try:
                 value = json.dumps(value)
+            except TypeError as e:
+                return False, str(e)
+
             return self.eval(u"%s = %s" % (name, value))
 
     def __get_error(self, err):
