@@ -28,6 +28,7 @@ except NameError:
     bytes = str
 
 preferredEncoding = None
+lib_path = None
 
 def getpreferredencoding():
     global preferredEncoding
@@ -40,20 +41,29 @@ def getpreferredencoding():
 
 
 def get_lib_path():
-    root = path.dirname(__file__)
+    global lib_path
 
-    if platform == "darwin":
-        return path.join(root, "libs/osx/libChakraCore.dylib")
+    if lib_path:
+        return lib_path
 
-    if platform.startswith("linux"):
-        return path.join(root, "libs/linux/libChakraCore.so")
+    else:
+        root = path.dirname(__file__)
 
-    if platform == "win32":
-        from platform import architecture
-        if architecture()[0].startswith("64"):
-            return path.join(root, "libs/windows/x64/ChakraCore.dll")
-        else:
-            return path.join(root, "libs/windows/x86/ChakraCore.dll")
+        if platform == "darwin":
+            lib_path = path.join(root, "libs/osx/libChakraCore.dylib")
+
+        elif platform.startswith("linux"):
+            lib_path = path.join(root, "libs/linux/libChakraCore.so")
+
+        elif platform == "win32":
+            from platform import architecture
+            if architecture()[0].startswith("64"):
+                lib_path = path.join(root, "libs/windows/x64/ChakraCore.dll")
+            else:
+                lib_path = path.join(root, "libs/windows/x86/ChakraCore.dll")
+
+        if lib_path:
+            return lib_path
 
     raise RuntimeError("ChakraCore not support your platform: %s, detail see: https://github.com/Microsoft/ChakraCore",
                        platform)
@@ -61,14 +71,6 @@ def get_lib_path():
 
 def point(obj):
     return ctypes.byref(obj)
-
-
-is_js_variable_name = re.compile(u"""
-^
-[\$a-zA-Z_][\$\da-zA-Z_]{0,254}
-(?:\.[\$a-zA-Z_][\$\da-zA-Z_]{0,254})*
-$
-""", re.VERBOSE).match
 
 
 class Runtime:
@@ -147,8 +149,8 @@ class Runtime:
         # get JSON.stringify reference, and create its called arguments array
         self.__jsonStringify = self.eval("JSON.stringify", raw=True)[1]
 
-        self.__jsonStringifyArgs = (ctypes.c_void_p * 2)()
-        self.__jsonStringifyArgs[0] = undefined
+        self.__callFunctionArgs = (ctypes.c_void_p * 2)()
+        self.__callFunctionArgs[0] = undefined
 
     def __del__(self):
         self.JsDisposeRuntime(self.runtime)
@@ -222,18 +224,28 @@ class Runtime:
 
         return js_string
 
-    def __check_js_variable_name(self, name):
-        name = self.__check_js_string(name)
-        if is_js_variable_name(name) is None:
-            raise ValueError("variable name illegal: %r" % str(name))
-        return name
+    def __call_js_function(self, js_function, *js_args):
+        js_args_len = len(js_args)
+
+        if js_args_len == 1:
+            # the most commonly used
+            call_function_args = self.__callFunctionArgs
+            call_function_args[1] = js_args[0]
+        else:
+            call_function_args = (ctypes.c_void_p * (js_args_len + 1))()
+            call_function_args[0] = self.__callFunctionArgs[0]
+            for n, js_arg in enumerate(js_args):
+                call_function_args[n + 1] = js_arg
+
+        result = ctypes.c_void_p()
+        err = self.JsCallFunction(js_function, point(call_function_args), 2, point(result))
+        call_function_args[1] = None
+
+        return result, err
 
     def __js_value_to_py_value(self, js_value):
-        self.__jsonStringifyArgs[1] = js_value
-
         # value => json
-        result = ctypes.c_void_p()
-        err = self.JsCallFunction(self.__jsonStringify, point(self.__jsonStringifyArgs), 2, point(result))
+        result, err = self.__call_js_function(self.__jsonStringify, js_value)
 
         if err == 0:
             result = self.__js_value_to_str(result)
@@ -247,52 +259,31 @@ class Runtime:
         return self.__get_error(err)
 
     def eval_file(self, js_file):
-        js_string = open(js_file, "rb").read()
+        if not hasattr(js_file, "read"):
+            js_file = open(js_file, "rb")
+        js_string = js_file.read()
         return self.eval(js_string)
 
     def get_variable(self, name, raw=False):
-        name = self.__check_js_variable_name(name)
         ok, result = self.eval(name, raw=raw)
         if ok:
             return result
         return None
 
     def set_variable(self, name, value):
-        name = self.__check_js_variable_name(name)
+        name = self.__check_js_string(name)
 
         if isinstance(value, ctypes.c_void_p) or isinstance(value, tuple) and "c_void_p" in str(value):
-            object_name, _, property_name = name.rpartition(u".")
+            set_variable = self.eval(u"(raw => %s = raw)" % name, raw=True)[1]
 
             self._acquire()
-
-            if object_name:
-                ok, result = self.eval(object_name, raw=True)
-                if ok:
-                    result_str = self.__js_value_to_str(result)
-                    ok = result_str not in ("undefined", "null")
-                    if ok:
-                        object = result
-                    err_msg = "TypeError: %r is %s, Unable to set property %r of it" % (str(object_name), result_str, str(property_name))
-                else:
-                    err_msg = result
-                if not ok:
-                    return False, err_msg
-
-            else:
-                object = self.__global
-
-            property_name = property_name.encode("UTF-8")
-            propertyId = ctypes.c_void_p()
-            err = self.JsCreatePropertyId(property_name, len(property_name), point(propertyId))
-            if err == 0:
-                err = self.JsSetProperty(object, propertyId, value, 0)
-
+            _, err = self.__call_js_function(set_variable, value)
             self._release()
 
             if err == 0:
                 return True, None
             else:
-                return False, err_msg
+                return self.__get_error(err)
 
         else:
             return self.eval(u"%s = %s" % (name, value))
