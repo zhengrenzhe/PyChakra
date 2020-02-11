@@ -27,6 +27,11 @@ try:
 except NameError:
     bytes = str
 
+try:
+    _RLock = threading._CRLock
+except AttributeError:
+    _RLock = threading._RLock
+
 preferredEncoding = None
 lib_path = None
 
@@ -75,59 +80,61 @@ def point(obj):
 
 class Runtime:
 
-    __current_runtime = None
-    __lock = threading.RLock()
-
     def _acquire(self):
-        if self.__lock:
-            self.__lock.acquire()
-
-        self.set_current_runtime(self)
+        if self._lock:
+            self._lock.acquire()
+        self.set_current_runtime()
 
     def _release(self):
-        if self.__lock:
-            self.__lock.release()
+        if self._lock:
+            self._lock.release()
 
-    @classmethod
-    def enable_lock(cls):
-        if isinstance(cls.__lock, threading.RLock):
+    def enable_lock(self):
+        lock = getattr(self.chakraCore, '_lock', None)
+        if isinstance(lock, _RLock):
             return
 
-        cls.__lock = threading.RLock()
+        self.chakraCore._lock = _RLock()
 
-    @classmethod
     def disable_lock(cls):
-        if cls.__lock is None:
+        lock = getattr(self.chakraCore, '_lock', None)
+        if lock is None:
             return
 
-        lock, cls.__lock = cls.__lock, None
+        self.chakraCore._lock = None
         try:
             lock._release_save()
         except:
             pass
 
-    @classmethod
-    def set_current_runtime(cls, runtime):
-        if not isinstance(runtime, cls):
-            raise TypeError("runtime must be a Runtime object, not %s" % type(runtime).__name__)
+    def set_current_runtime(self):
+        runtime = id(self)
+        if self._current_runtime != runtime:
+            self.chakraCore._current_runtime = runtime
+            self.JsSetCurrentContext(self.context)
 
-        _id = id(runtime)
-        if cls.__current_runtime != _id:
-            cls.__current_runtime = _id
-            runtime.JsSetCurrentContext(runtime.context)
-
-    def __init__(self):
+    def __init__(self, threading=False):
         # load dynamic library
         if platform == "win32":
             self.chakraCore = ctypes.windll[get_lib_path()]
         else:
             self.chakraCore = ctypes.cdll[get_lib_path()]
 
+        if not hasattr(self.chakraCore, "_current_runtime"):
+            self.chakraCore._current_runtime = None
+            self.chakraCore._lock = None
+
             # call DllMain manually on non-Windows
-            # Attach process
-            self.chakraCore.DllMain(0, 1, 0)
-            # Attach main thread
-            self.chakraCore.DllMain(0, 2, 0)
+            if platform != "win32":
+                # Attach process
+                self.chakraCore.DllMain(0, 1, 0)
+                # Attach main thread
+                self.chakraCore.DllMain(0, 2, 0)
+
+        # whether to use threading
+        if threading:
+            # apply enable to all Runtime() which load the same ChakraCore binary
+            self.enable_lock()
 
         # create chakra runtime and context
         self.runtime = ctypes.c_void_p()
