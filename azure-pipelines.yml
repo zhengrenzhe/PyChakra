@@ -16,14 +16,14 @@ jobs:
       matrix:
         Python27:
           python.version: '2.7'
-        Python34:
-          python.version: '3.4'
         Python35:
           python.version: '3.5'
         Python36:
           python.version: '3.6'
         Python37:
           python.version: '3.7'
+        Python38:
+          python.version: '3.8'
 
     steps:
     - task: UsePythonVersion@0
@@ -45,14 +45,14 @@ jobs:
       matrix:
         Python27:
           python.version: '2.7'
-        Python34:
-          python.version: '3.4'
         Python35:
           python.version: '3.5'
         Python36:
           python.version: '3.6'
         Python37:
           python.version: '3.7'
+        Python38:
+          python.version: '3.8'
 
     steps:
     - task: UsePythonVersion@0
@@ -74,14 +74,14 @@ jobs:
       matrix:
         Python27:
           python.version: '2.7'
-        Python34:
-          python.version: '3.4'
         Python35:
           python.version: '3.5'
         Python36:
           python.version: '3.6'
         Python37:
           python.version: '3.7'
+        Python38:
+          python.version: '3.8'
 
     steps:
     - task: UsePythonVersion@0
