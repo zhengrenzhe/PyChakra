@@ -45,7 +45,8 @@ class TestPyChakra(unittest.TestCase):
         self.assertEqual(True, res5[0])
 
         res6 = chakra.get_variable("foo")
-        self.assertEqual("bar", res6)
+        self.assertEqual(True, res6[0])
+        self.assertEqual("bar", res6[1])
 
         res7 = chakra.eval("(() => 2)();")
         self.assertEqual(True, res7[0])
