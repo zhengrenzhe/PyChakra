@@ -74,6 +74,14 @@ def get_lib_path():
                        platform)
 
 
+is_js_variable_name = re.compile(u"""
+^
+[\$a-zA-Z_][\$\da-zA-Z_]*
+(\.[\$a-zA-Z_][\$\da-zA-Z_]*)*
+$
+""", re.VERBOSE).match
+
+
 def point(obj):
     return ctypes.byref(obj)
 
@@ -231,6 +239,12 @@ class Runtime:
 
         return js_string
 
+    def __check_js_variable_name(self, name):
+        name = self.__check_js_string(name)
+        if is_js_variable_name(name) is None:
+            raise ValueError("variable name illegal: %r" % str(name))
+        return name
+
     def __call_js_function(self, js_function, *js_args):
         js_args_len = len(js_args)
 
@@ -272,13 +286,18 @@ class Runtime:
         return self.eval(js_string)
 
     def get_variable(self, name, raw=False):
-        ok, result = self.eval(name, raw=raw)
-        if ok:
-            return result
-        return None
+        try:
+            name = self.__check_js_variable_name(name)
+        except ValueError as e:
+            return False, str(e)
+
+        return self.eval(name, raw=raw)
 
     def set_variable(self, name, value):
-        name = self.__check_js_string(name)
+        try:
+            name = self.__check_js_variable_name(name)
+        except ValueError as e:
+            return False, str(e)
 
         if isinstance(value, ctypes.c_void_p) or isinstance(value, tuple) and "c_void_p" in str(value):
             set_variable = self.eval(u"(raw => %s = raw)" % name, raw=True)[1]
@@ -293,7 +312,7 @@ class Runtime:
                 return self.__get_error(err)
 
         else:
-            return self.eval(u"%s = %s" % (name, value))
+            return self.eval(u"%s = %s" % (name, json.dumps(value)))
 
     def __get_error(self, err):
         # js exception or other error
