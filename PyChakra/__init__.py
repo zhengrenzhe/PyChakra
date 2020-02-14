@@ -247,19 +247,20 @@ class Runtime:
 
     def __call_js_function(self, js_function, *js_args):
         js_args_len = len(js_args)
+        call_function_args_len = js_args_len + 1
 
         if js_args_len == 1:
             # the most commonly used
             call_function_args = self.__callFunctionArgs
             call_function_args[1] = js_args[0]
         else:
-            call_function_args = (ctypes.c_void_p * (js_args_len + 1))()
+            call_function_args = (ctypes.c_void_p * call_function_args_len)()
             call_function_args[0] = self.__callFunctionArgs[0]
             for n, js_arg in enumerate(js_args):
                 call_function_args[n + 1] = js_arg
 
         result = ctypes.c_void_p()
-        err = self.JsCallFunction(js_function, point(call_function_args), 2, point(result))
+        err = self.JsCallFunction(js_function, point(call_function_args), call_function_args_len, point(result))
         call_function_args[1] = None
 
         return result, err
