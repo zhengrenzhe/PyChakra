@@ -3,7 +3,7 @@ PyChakra
 
 |Azure Build Status| |LICENSE| |VERSION| |DL|
 
-PyChakra is a Python binding to `Microsoft Chakra`_\ (v1.11.11)
+PyChakra is a Python binding to `Microsoft Chakra`_\ (v1.11.16)
 Javascript engine.
 
 Chakra is a modern JavaScript engine for Microsoft Edge, it support 96%
